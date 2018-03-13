@@ -116,16 +116,18 @@ public class PermissionUtil {
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        int r = grantResults[0];
-        boolean isGranted = r == PackageManager.PERMISSION_GRANTED;
+        if (grantResults.length > 0) {
+            int r = grantResults[0];
+            boolean isGranted = r == PackageManager.PERMISSION_GRANTED;
 
-        if (requestCode == 10000) {
-            if (isGranted) {
-                if (mOnPermissionGrantedListener != null) {
-                    mOnPermissionGrantedListener.onExecute();
+            if (requestCode == 10000) {
+                if (isGranted) {
+                    if (mOnPermissionGrantedListener != null) {
+                        mOnPermissionGrantedListener.onExecute();
+                    }
+                } else {
+                    Log.d(getClass().getCanonicalName(), "User denied this permissions");
                 }
-            } else {
-                Log.d(getClass().getCanonicalName(), "User denied this permissions");
             }
         }
     }
