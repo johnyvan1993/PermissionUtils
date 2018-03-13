@@ -9,6 +9,8 @@ import android.util.Log;
 import com.library.pw.permissionsutil.di.ContextModule;
 import com.library.pw.permissionsutil.di.DaggerPermissionComponent;
 
+import java.util.Arrays;
+
 import javax.inject.Inject;
 
 /**
@@ -71,7 +73,7 @@ public class PermissionUtil {
     }
 
     //callback nullable
-    public void requirePermissions(GroupPermissions groupPermissions, OnPermissionGranted onPermissionGranted) {
+    public boolean requirePermissions(GroupPermissions groupPermissions, OnPermissionGranted onPermissionGranted) {
         mOnPermissionGrantedListener = onPermissionGranted;
 
         Result result = check(groupPermissions);
@@ -79,16 +81,37 @@ public class PermissionUtil {
         String[] list = result.getPermissions();
         System.out.println(result.getMessage());
         switch (status) {
-            case "denied":
-                ActivityCompat.requestPermissions(mActivity, list, 10000);
-                break;
             case "granted":
                 if (mOnPermissionGrantedListener != null) {
                     mOnPermissionGrantedListener.onExecute();
                 }
-                break;
+                return true;
+            case "denied":
+                ActivityCompat.requestPermissions(mActivity, list, 10000);
+                return false;
             default:
-                break;
+                return false;
+        }
+    }
+
+    //callback nullable
+    public void requirePermissions(GroupPermissions[] listGroup, OnPermissionGranted onPermissionGranted) {
+        Boolean[] booleans = new Boolean[]{};
+        for (GroupPermissions groupPermissions : listGroup) {
+            boolean isGranted = requirePermissions(groupPermissions, null);
+            if (isGranted) {
+                Arrays.fill(booleans, Boolean.TRUE);
+            }
+        }
+
+        mOnPermissionGrantedListener = onPermissionGranted;
+
+        int listSize = listGroup.length;
+        int bSize = booleans.length;
+        if (bSize == listSize) {
+            if (mOnPermissionGrantedListener != null) {
+                mOnPermissionGrantedListener.onExecute();
+            }
         }
     }
 

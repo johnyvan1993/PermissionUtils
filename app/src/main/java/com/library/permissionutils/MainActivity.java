@@ -1,10 +1,9 @@
 package com.library.permissionutils;
 
-import android.content.Intent;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.library.permissionutils.di.DaggerMyComponent;
 import com.library.permissionutils.di.MyModule;
@@ -24,11 +23,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         DaggerMyComponent.builder().myModule(new MyModule(this)).build().inject(this);
 
-        mPermissionUtil.requirePermissions(GroupPermissions.CAMERA, new OnPermissionGranted() {
+        mPermissionUtil.requirePermissions(new GroupPermissions[]{GroupPermissions.CAMERA, GroupPermissions.NETWORK, GroupPermissions.MEDIA, GroupPermissions.STORAGE}, new OnPermissionGranted() {
             @Override
             public void onExecute() {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivity(intent);
+                Toast.makeText(getApplicationContext(), "permissions are granted", Toast.LENGTH_SHORT).show();
             }
         });
     }
