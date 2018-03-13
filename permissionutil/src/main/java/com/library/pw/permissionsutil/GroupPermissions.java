@@ -15,5 +15,6 @@ public enum GroupPermissions {
     BOOT,
     SMS,
     CONTACT,
-    ROOT
+    ROOT,
+    DANGEROUS
 }

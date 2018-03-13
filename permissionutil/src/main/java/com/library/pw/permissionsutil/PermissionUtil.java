@@ -2,6 +2,7 @@ package com.library.pw.permissionsutil;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -9,7 +10,9 @@ import android.util.Log;
 import com.library.pw.permissionsutil.di.ContextModule;
 import com.library.pw.permissionsutil.di.DaggerPermissionComponent;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -28,6 +31,9 @@ public class PermissionUtil {
     private Result mResult;
     private OnPermissionGranted mOnPermissionGrantedListener;
 
+    private int size = 0;
+    private int count = 0;
+
     private Result check(GroupPermissions groupPermissions) {
 
         if (groupPermissions == null) {
@@ -37,11 +43,14 @@ public class PermissionUtil {
             return mResult;
         }
 
+        String[] lists = Util.getPermissions(groupPermissions);
+        return handleList(lists);
+    }
+
+    private Result handleList(String[] lists) {
         if (mResult == null) {
             mResult = new Result();
         }
-
-        String[] lists = Util.getPermissions(groupPermissions);
 
         if (lists == null) {
             mResult
@@ -50,6 +59,7 @@ public class PermissionUtil {
             return mResult;
         }
 
+        size = lists.length;
         mResult.setPermissions(lists);
 
         for (String p : lists) {
@@ -77,9 +87,12 @@ public class PermissionUtil {
         mOnPermissionGrantedListener = onPermissionGranted;
 
         Result result = check(groupPermissions);
+        return handleResult(result);
+    }
+
+    private boolean handleResult(Result result) {
         String status = result.getStatus();
         String[] list = result.getPermissions();
-        System.out.println(result.getMessage());
         switch (status) {
             case "granted":
                 if (mOnPermissionGrantedListener != null) {
@@ -87,7 +100,11 @@ public class PermissionUtil {
                 }
                 return true;
             case "denied":
-                ActivityCompat.requestPermissions(mActivity, list, 10000);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mActivity.requestPermissions(list, 10000);
+                } else {
+                    ActivityCompat.requestPermissions(mActivity, list, 10000);
+                }
                 return false;
             default:
                 return false;
@@ -96,38 +113,36 @@ public class PermissionUtil {
 
     //callback nullable
     public void requirePermissions(GroupPermissions[] listGroup, OnPermissionGranted onPermissionGranted) {
-        Boolean[] booleans = new Boolean[]{};
+        List<String> results = new ArrayList<>();
         for (GroupPermissions groupPermissions : listGroup) {
-            boolean isGranted = requirePermissions(groupPermissions, null);
-            if (isGranted) {
-                Arrays.fill(booleans, Boolean.TRUE);
+            String[] list = Util.getPermissions(groupPermissions);
+            if (list != null && list.length > 0) {
+                Collections.addAll(results, list);
             }
         }
 
         mOnPermissionGrantedListener = onPermissionGranted;
-
-        int listSize = listGroup.length;
-        int bSize = booleans.length;
-        if (bSize == listSize) {
-            if (mOnPermissionGrantedListener != null) {
-                mOnPermissionGrantedListener.onExecute();
-            }
-        }
+        Result result = handleList(results.toArray(new String[]{}));
+        handleResult(result);
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (grantResults.length > 0) {
-            int r = grantResults[0];
-            boolean isGranted = r == PackageManager.PERMISSION_GRANTED;
+        if (requestCode == 10000) {
+            if (grantResults.length > 0) {
 
-            if (requestCode == 10000) {
-                if (isGranted) {
+                for (int i : grantResults) {
+                    boolean isGranted = i == PackageManager.PERMISSION_GRANTED;
+                    if (isGranted) ++count;
+                }
+
+                if (count == size) {
                     if (mOnPermissionGrantedListener != null) {
                         mOnPermissionGrantedListener.onExecute();
                     }
-                } else {
-                    Log.d(getClass().getCanonicalName(), "User denied this permissions");
                 }
+
+                count = 0;
+                size = 0;
             }
         }
     }
