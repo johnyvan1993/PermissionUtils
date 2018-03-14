@@ -22,21 +22,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         DaggerMyComponent.builder().myModule(new MyModule(this)).build().inject(this);
-    }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        mPermissionUtil.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mPermissionUtil.requirePermissions(new GroupPermissions[]{GroupPermissions.CAMERA}, new OnPermissionGranted() {
+        mPermissionUtil.requirePermissions(new GroupPermissions[]{
+                GroupPermissions.CAMERA,
+                GroupPermissions.LOCATION,
+                GroupPermissions.NETWORK,
+                GroupPermissions.CONTACT,
+                GroupPermissions.CALLS,
+                GroupPermissions.MEDIA
+        }, new OnPermissionGranted() {
             @Override
             public void onExecute() {
                 Toast.makeText(getBaseContext(), "success", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mPermissionUtil.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }

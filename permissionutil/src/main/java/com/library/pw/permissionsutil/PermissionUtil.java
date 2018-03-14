@@ -93,6 +93,7 @@ public class PermissionUtil {
     private boolean handleResult(Result result) {
         String status = result.getStatus();
         String[] list = result.getPermissions();
+        Log.d(getClass().getCanonicalName(), result.getMessage());
         switch (status) {
             case "granted":
                 if (mOnPermissionGrantedListener != null) {
@@ -132,7 +133,10 @@ public class PermissionUtil {
 
                 for (int i : grantResults) {
                     boolean isGranted = i == PackageManager.PERMISSION_GRANTED;
-                    if (isGranted) ++count;
+                    if (isGranted) {
+                        Log.d(getClass().getCanonicalName(), "permission " + permissions[count] + " is granted");
+                        ++count;
+                    }
                 }
 
                 if (count == size) {
