@@ -21,7 +21,7 @@ public class Util {
             case CONTACT:
                 return new String[]{Manifest.permission.READ_CONTACTS};
             case MEDIA:
-                return new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MODIFY_AUDIO_SETTINGS};
+                return new String[]{Manifest.permission.RECORD_AUDIO};
             case GRAPHICS:
                 return new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW};
             case CALLS:
