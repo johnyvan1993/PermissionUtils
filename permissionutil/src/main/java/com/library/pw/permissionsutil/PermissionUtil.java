@@ -34,6 +34,29 @@ public class PermissionUtil {
     private int size = 0;
     private int count = 0;
 
+    //callback nullable
+    public boolean requirePermissions(GroupPermissions groupPermissions, OnPermissionGranted onPermissionGranted) {
+        mOnPermissionGrantedListener = onPermissionGranted;
+
+        Result result = check(groupPermissions);
+        return handleResult(result);
+    }
+
+    //callback nullable
+    public void requirePermissions(GroupPermissions[] listGroup, OnPermissionGranted onPermissionGranted) {
+        List<String> results = new ArrayList<>();
+        for (GroupPermissions groupPermissions : listGroup) {
+            String[] list = Util.getPermissions(groupPermissions);
+            if (list != null && list.length > 0) {
+                Collections.addAll(results, list);
+            }
+        }
+
+        mOnPermissionGrantedListener = onPermissionGranted;
+        Result result = handleList(results.toArray(new String[]{}));
+        handleResult(result);
+    }
+
     private Result check(GroupPermissions groupPermissions) {
 
         if (groupPermissions == null) {
@@ -59,7 +82,6 @@ public class PermissionUtil {
             return mResult;
         }
 
-        size = lists.length;
         mResult.setPermissions(lists);
 
         for (String p : lists) {
@@ -82,13 +104,6 @@ public class PermissionUtil {
         return mResult;
     }
 
-    //callback nullable
-    public boolean requirePermissions(GroupPermissions groupPermissions, OnPermissionGranted onPermissionGranted) {
-        mOnPermissionGrantedListener = onPermissionGranted;
-
-        Result result = check(groupPermissions);
-        return handleResult(result);
-    }
 
     private boolean handleResult(Result result) {
         String status = result.getStatus();
@@ -112,24 +127,10 @@ public class PermissionUtil {
         }
     }
 
-    //callback nullable
-    public void requirePermissions(GroupPermissions[] listGroup, OnPermissionGranted onPermissionGranted) {
-        List<String> results = new ArrayList<>();
-        for (GroupPermissions groupPermissions : listGroup) {
-            String[] list = Util.getPermissions(groupPermissions);
-            if (list != null && list.length > 0) {
-                Collections.addAll(results, list);
-            }
-        }
-
-        mOnPermissionGrantedListener = onPermissionGranted;
-        Result result = handleList(results.toArray(new String[]{}));
-        handleResult(result);
-    }
-
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == 10000) {
             if (grantResults.length > 0) {
+                size = permissions.length;
 
                 for (int i : grantResults) {
                     boolean isGranted = i == PackageManager.PERMISSION_GRANTED;
