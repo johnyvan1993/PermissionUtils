@@ -28,17 +28,10 @@ public class Util {
                 return new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE};
             case BOOT:
                 return new String[]{Manifest.permission.RECEIVE_BOOT_COMPLETED, Manifest.permission.WAKE_LOCK};
-            case ROOT:
-                return new String[]{READ_PRIVILEGED_PHONE_STATE, Manifest.permission.WRITE_SECURE_SETTINGS, Manifest.permission.MODIFY_PHONE_STATE, Manifest.permission.WRITE_CONTACTS};
             case SMS:
-                return new String[]{WRITE_SMS, Manifest.permission.READ_SMS};
-            case DANGEROUS:
-                return new String[]{Manifest.permission.LOCATION_HARDWARE, Manifest.permission.CAPTURE_VIDEO_OUTPUT, Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT, Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.PROCESS_OUTGOING_CALLS};
+                return new String[]{Manifest.permission.READ_SMS};
             default:
                 return null;
         }
     }
-
-    private static String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
-    private static String WRITE_SMS = "android.permission.WRITE_SMS";
 }
